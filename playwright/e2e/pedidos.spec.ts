@@ -15,18 +15,18 @@ test('deve consulta um pedido aprovado', async ({ page }) => {
 
 //Assert
   // Checkpoint 3: Verificar se o pedido foi encontrado
-  await expect(page.getByTestId('order-result-VLO-4V79FY')).toBeVisible({timeout: 15_000})
-
-  //Challenge 1:
-  await expect(page.locator('p.font-mono.font-medium')).toContainText('VLO-4V79FY')
-  await expect(page.locator('div.bg-green-100.text-green-700')).toContainText('APROVADO')
-  
-  //Challenge 1:
-  await expect(page.getByTestId('order-result-VLO-4V79FY')).toContainText('VLO-4V79FY')
-  await expect(page.getByTestId('order-result-VLO-4V79FY')).toContainText('APROVADO')
+  await expect(page.getByTestId('order-result-VLO-4V79FY')).toBeVisible({timeout: 15_000})  
 
   //code normal
-  //await expect(page.getByTestId('order-result-id')).toContainText('VLO-4V79FY')
-  //await expect(page.getByTestId('order-result-status')).toContainText('APROVADO')
+  await expect(page.getByTestId('order-result-id')).toContainText('VLO-4V79FY')
+  await expect(page.getByTestId('order-result-status')).toContainText('APROVADO')
+
+  //Challenge 1:
+  // await expect(page.locator('p.font-mono.font-medium')).toContainText('VLO-4V79FY')
+  // await expect(page.locator('div.bg-green-100.text-green-700')).toContainText('APROVADO')
+  
+  //Challenge 1:
+  // await expect(page.getByTestId('order-result-VLO-4V79FY')).toContainText('VLO-4V79FY')
+  // await expect(page.getByTestId('order-result-VLO-4V79FY')).toContainText('APROVADO')
 
 })
