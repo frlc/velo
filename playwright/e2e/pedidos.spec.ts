@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { generateOrderCode } from '../support/helpers'
 
 test('deve consulta um pedido aprovado',{ tag: '@TC-002' }, async ({ page }) => {
 
@@ -45,7 +46,7 @@ test('deve consulta um pedido aprovado',{ tag: '@TC-002' }, async ({ page }) => 
 test('deve exibir mensagem de pedido nao encontrado',{ tag: '@TC-003' }, async ({ page }) => {
 
     //Test data:
-    const orderId = 'VLO-abc123'
+    const orderId = generateOrderCode()
   
     //Arrange
     await page.goto('http://localhost:5173/')
