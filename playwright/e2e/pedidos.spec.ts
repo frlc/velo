@@ -12,9 +12,8 @@ test.describe('Consulta de pedidos', () => {
     await page.getByRole('link', { name: 'Consultar Pedido' }).click()
     // Checkpoint 2: Verificar se a página de consulta de pedido está carregada
     await expect(page.getByRole('heading')).toContainText('Consultar Pedido') 
-    
-  })
- 
+
+  }) 
 
   test('deve consulta um pedido aprovado',{ tag: '@TC-002' }, async ({ page }) => {
 
@@ -79,6 +78,55 @@ test.describe('Consulta de pedidos', () => {
     - paragraph: Verifique o número do pedido e tente novamente
     `)
       
+  })
+
+  test('deve consulta um pedido aprovado usando snapshot',{ tag: '@TC-004' }, async ({ page }) => {
+
+    //Test data:
+    const orderId = 'VLO-4V79FY'
+    const orderStatus = 'APROVADO'
+  
+    //Arrange
+    
+  
+    //Act
+    await page.getByTestId('search-order-id').fill(orderId)
+    await page.getByTestId('search-order-button').click()
+  
+    //Assert
+    
+    await expect(page.getByTestId(`order-result-${orderId}`)).toMatchAriaSnapshot(`
+      - img
+      - paragraph: Pedido
+      - paragraph: ${orderId}
+      - img
+      - text: ${orderStatus}
+      - img "Velô Sprint"
+      - paragraph: Modelo
+      - paragraph: Velô Sprint
+      - paragraph: Cor
+      - paragraph: Glacier Blue
+      - paragraph: Interior
+      - paragraph: cream
+      - paragraph: Rodas
+      - paragraph: aero Wheels
+      - heading "Dados do Cliente" [level=4]
+      - paragraph: Nome
+      - paragraph: fernando cruz
+      - paragraph: Email
+      - paragraph: teste@teste.com
+      - paragraph: Loja de Retirada
+      - paragraph
+      - paragraph: Data do Pedido
+      - paragraph: /\\d+\\/\\d+\\/\\d+/
+      - heading "Pagamento" [level=4]
+      - paragraph: À Vista
+      - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
+      `)
+
+  
+    
+  
   })
   
 })
