@@ -80,7 +80,7 @@ test.describe('Consulta de pedidos', () => {
       
   })
 
-  test('deve consulta um pedido aprovado usando snapshot',{ tag: '@TC-004' }, async ({ page }) => {
+  test('deve consulta um pedido Aprovado usando snapshot',{ tag: '@TC-004' }, async ({ page }) => {
 
     //Test data:
     const order = {
@@ -110,8 +110,9 @@ test.describe('Consulta de pedidos', () => {
       - img
       - paragraph: Pedido
       - paragraph: ${order.number}
-      - img
-      - text: ${order.status}
+      - status:
+        - img
+        - text: ${order.status}
       - img "Velô Sprint"
       - paragraph: Modelo
       - paragraph: ${order.model}
@@ -135,8 +136,12 @@ test.describe('Consulta de pedidos', () => {
       - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
       `)
 
-  
-    
+      const statusBadge = page.getByRole('status').filter({ hasText: order.status })
+      await expect(statusBadge).toContainClass('bg-green-100')
+      await expect(statusBadge).toContainClass('text-green-700')
+
+      const statusIcon = statusBadge.locator('svg')
+      await expect(statusIcon).toContainClass('lucide-circle-check-big')
   
   })
 
@@ -170,8 +175,9 @@ test.describe('Consulta de pedidos', () => {
       - img
       - paragraph: Pedido
       - paragraph: ${order.number}
-      - img
-      - text: ${order.status}
+      - status:
+        - img
+        - text: ${order.status}
       - img "Velô Sprint"
       - paragraph: Modelo
       - paragraph: ${order.model}
@@ -193,7 +199,14 @@ test.describe('Consulta de pedidos', () => {
       - heading "Pagamento" [level=4]
       - paragraph: ${order.payment}
       - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
-      `)   
+      `)
+      
+      const statusBadge = page.getByRole('status').filter({ hasText: order.status })
+      await expect(statusBadge).toContainClass('bg-red-100')
+      await expect(statusBadge).toContainClass('text-red-700')
+
+      const statusIcon = statusBadge.locator('svg')
+      await expect(statusIcon).toContainClass('lucide-circle-x')
   
   })
 
@@ -227,8 +240,9 @@ test.describe('Consulta de pedidos', () => {
       - img
       - paragraph: Pedido
       - paragraph: ${order.number}
-      - img
-      - text: ${order.status}
+      - status:
+        - img
+        - text: ${order.status}
       - img "Velô Sprint"
       - paragraph: Modelo
       - paragraph: ${order.model}
@@ -250,7 +264,14 @@ test.describe('Consulta de pedidos', () => {
       - heading "Pagamento" [level=4]
       - paragraph: ${order.payment}
       - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
-      `)   
+      `)
+      
+      const statusBadge = page.getByRole('status').filter({ hasText: order.status })
+      await expect(statusBadge).toContainClass('bg-amber-100')
+      await expect(statusBadge).toContainClass('text-amber-700')
+
+      const statusIcon = statusBadge.locator('svg')
+      await expect(statusIcon).toContainClass('lucide-clock')
   
   })
   
