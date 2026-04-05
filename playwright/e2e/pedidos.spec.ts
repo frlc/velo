@@ -83,49 +83,174 @@ test.describe('Consulta de pedidos', () => {
   test('deve consulta um pedido aprovado usando snapshot',{ tag: '@TC-004' }, async ({ page }) => {
 
     //Test data:
-    const orderId = 'VLO-4V79FY'
-    const orderStatus = 'APROVADO'
+    const order = {
+      number: 'VLO-4V79FY', 
+      status: 'APROVADO',
+      model: 'Velô Sprint',
+      color: 'Glacier Blue',
+      interior: 'cream',
+      wheels: 'aero Wheels',
+      customer: {
+        name: 'fernando cruz',
+        email: 'teste@teste.com',
+      },
+      payment: 'À Vista'
+    }  
   
     //Arrange
     
   
     //Act
-    await page.getByTestId('search-order-id').fill(orderId)
+    await page.getByTestId('search-order-id').fill(order.number)
     await page.getByTestId('search-order-button').click()
   
     //Assert
     
-    await expect(page.getByTestId(`order-result-${orderId}`)).toMatchAriaSnapshot(`
+    await expect(page.getByTestId(`order-result-${order.number}`)).toMatchAriaSnapshot(`
       - img
       - paragraph: Pedido
-      - paragraph: ${orderId}
+      - paragraph: ${order.number}
       - img
-      - text: ${orderStatus}
+      - text: ${order.status}
       - img "Velô Sprint"
       - paragraph: Modelo
-      - paragraph: Velô Sprint
+      - paragraph: ${order.model}
       - paragraph: Cor
-      - paragraph: Glacier Blue
+      - paragraph: ${order.color}
       - paragraph: Interior
-      - paragraph: cream
+      - paragraph: ${order.interior}
       - paragraph: Rodas
-      - paragraph: aero Wheels
+      - paragraph: ${order.wheels}
       - heading "Dados do Cliente" [level=4]
       - paragraph: Nome
-      - paragraph: fernando cruz
+      - paragraph: ${order.customer.name}
       - paragraph: Email
-      - paragraph: teste@teste.com
+      - paragraph: ${order.customer.email}
       - paragraph: Loja de Retirada
       - paragraph
       - paragraph: Data do Pedido
       - paragraph: /\\d+\\/\\d+\\/\\d+/
       - heading "Pagamento" [level=4]
-      - paragraph: À Vista
+      - paragraph: ${order.payment}
       - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
       `)
 
   
     
+  
+  })
+
+  test('deve consulta um pedido Reprovado usando snapshot',{ tag: '@TC-005' }, async ({ page }) => {
+
+    //Test data:
+    const order = {
+      number: 'VLO-5H0SCE', 
+      status: 'REPROVADO',
+      model: 'Velô Sprint',
+      color: 'Midnight Black',
+      interior: 'cream',
+      wheels: 'sport Wheels',
+      customer: {
+        name: 'Gabriel Felipe',
+        email: 'biel@lindo.com.br',
+      },
+      payment: 'À Vista'
+    }  
+  
+    //Arrange
+    
+  
+    //Act
+    await page.getByTestId('search-order-id').fill(order.number)
+    await page.getByTestId('search-order-button').click()
+  
+    //Assert
+    
+    await expect(page.getByTestId(`order-result-${order.number}`)).toMatchAriaSnapshot(`
+      - img
+      - paragraph: Pedido
+      - paragraph: ${order.number}
+      - img
+      - text: ${order.status}
+      - img "Velô Sprint"
+      - paragraph: Modelo
+      - paragraph: ${order.model}
+      - paragraph: Cor
+      - paragraph: ${order.color}
+      - paragraph: Interior
+      - paragraph: ${order.interior}
+      - paragraph: Rodas
+      - paragraph: ${order.wheels}
+      - heading "Dados do Cliente" [level=4]
+      - paragraph: Nome
+      - paragraph: ${order.customer.name}
+      - paragraph: Email
+      - paragraph: ${order.customer.email}
+      - paragraph: Loja de Retirada
+      - paragraph
+      - paragraph: Data do Pedido
+      - paragraph: /\\d+\\/\\d+\\/\\d+/
+      - heading "Pagamento" [level=4]
+      - paragraph: ${order.payment}
+      - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
+      `)   
+  
+  })
+
+  test('deve consulta um pedido Em Analise usando snapshot',{ tag: '@TC-006' }, async ({ page }) => {
+
+    //Test data:
+    const order = {
+      number: 'VLO-RPW1F5', 
+      status: 'EM_ANALISE',
+      model: 'Velô Sprint',
+      color: 'Lunar White',
+      interior: 'cream',
+      wheels: 'aero Wheels',
+      customer: {
+        name: 'fernando financiado',
+        email: 'teste@teste.com',
+      },
+      payment: 'Financiamento 12x'
+    }  
+  
+    //Arrange
+    
+  
+    //Act
+    await page.getByTestId('search-order-id').fill(order.number)
+    await page.getByTestId('search-order-button').click()
+  
+    //Assert
+    
+    await expect(page.getByTestId(`order-result-${order.number}`)).toMatchAriaSnapshot(`
+      - img
+      - paragraph: Pedido
+      - paragraph: ${order.number}
+      - img
+      - text: ${order.status}
+      - img "Velô Sprint"
+      - paragraph: Modelo
+      - paragraph: ${order.model}
+      - paragraph: Cor
+      - paragraph: ${order.color}
+      - paragraph: Interior
+      - paragraph: ${order.interior}
+      - paragraph: Rodas
+      - paragraph: ${order.wheels}
+      - heading "Dados do Cliente" [level=4]
+      - paragraph: Nome
+      - paragraph: ${order.customer.name}
+      - paragraph: Email
+      - paragraph: ${order.customer.email}
+      - paragraph: Loja de Retirada
+      - paragraph
+      - paragraph: Data do Pedido
+      - paragraph: /\\d+\\/\\d+\\/\\d+/
+      - heading "Pagamento" [level=4]
+      - paragraph: ${order.payment}
+      - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
+      `)   
   
   })
   
