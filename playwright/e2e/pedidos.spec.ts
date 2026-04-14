@@ -1,24 +1,36 @@
 import { test, expect } from '../support/fixtures'
 import { generateOrderCode } from '../support/helpers'
 import type { OrderDetails } from '../support/actions/orderLookupActions'
+import { insertOrder, deleteOrderByNumber } from '../support/database/orderRepository'
 
 test.describe('Consulta de Pedido', () => {
+
   test.beforeEach(async ({ app }) => {
     await app.orderLookup.open()
   })
 
+  // VLO-9X0H93
+
   test('deve consultar um pedido aprovado', async ({ app }) => {
+
     const order: OrderDetails = {
-      number: 'VLO-4V79FY',
-      status: 'APROVADO' as const,
+      number: 'VLO-SE4R01',
+      status: 'APROVADO',
       color: 'Glacier Blue',
       wheels: 'aero Wheels',
       customer: {
-        name: 'fernando cruz',
-        email: 'teste@teste.com',
+        name: 'Fernando Papito',
+        email: 'papito@velo.dev',
+        document: '780.228.290-05',
+        phone: '(11) 99999-9999',
       },
-      payment: 'À Vista'
+      payment: 'À Vista',
+      totalPrice: 40000,
     }
+
+    await deleteOrderByNumber(order.number)
+
+    await insertOrder(order)
 
     await app.orderLookup.searchOrder(order.number)
     await app.orderLookup.validateOrderDetails(order)
@@ -26,17 +38,25 @@ test.describe('Consulta de Pedido', () => {
   })
 
   test('deve consultar um pedido reprovado', async ({ app }) => {
+
     const order: OrderDetails = {
-      number: 'VLO-5H0SCE',
-      status: 'REPROVADO' as const,
+      number: 'VLO-SE4R02',
+      status: 'REPROVADO',
       color: 'Midnight Black',
       wheels: 'sport Wheels',
       customer: {
-        name: 'Gabriel Felipe',
-        email: 'biel@lindo.com.br',
+        name: 'Steve Jobs',
+        email: 'jobs@apple.com',
+        document: '780.228.290-05',
+        phone: '(11) 99999-9999',
       },
-      payment: 'À Vista'
+      payment: 'À Vista',
+      totalPrice: 40000,
     }
+
+    await deleteOrderByNumber(order.number)
+
+    await insertOrder(order)
 
     await app.orderLookup.searchOrder(order.number)
     await app.orderLookup.validateOrderDetails(order)
@@ -45,16 +65,23 @@ test.describe('Consulta de Pedido', () => {
 
   test('deve consultar um pedido em analise', async ({ app }) => {
     const order: OrderDetails = {
-      number: 'VLO-RPW1F5',
-      status: 'EM_ANALISE' as const,
+      number: 'VLO-SE4R03',
+      status: 'EM_ANALISE',
       color: 'Lunar White',
       wheels: 'aero Wheels',
       customer: {
-        name: 'fernando financiado',
-        email: 'teste@teste.com',
+        name: 'João da Silva',
+        email: 'joao@velo.dev',
+        document: '780.228.290-05',
+        phone: '(11) 99999-9999',
       },
-      payment: 'Financiamento 12x'
+      payment: 'À Vista',
+      totalPrice: 40000,
     }
+
+    await deleteOrderByNumber(order.number)
+
+    await insertOrder(order)
 
     await app.orderLookup.searchOrder(order.number)
     await app.orderLookup.validateOrderDetails(order)
@@ -76,7 +103,8 @@ test.describe('Consulta de Pedido', () => {
   test('deve manter o botão de busca desabilitado com campo vazio ou apenas espaços', async ({ app, page }) => {
     const button = app.orderLookup.elements.searchButton
     await expect(button).toBeDisabled()
-    await app.orderLookup.elements.orderInput.fill('  ')
+
+    await app.orderLookup.elements.orderInput.fill('     ')
     await expect(button).toBeDisabled()
   })
 })
