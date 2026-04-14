@@ -24,5 +24,18 @@ export function createConfiguratorActions(page: Page) {
       const carImage = page.locator('img[alt^="Velô Sprint"]')
       await expect(carImage).toHaveAttribute('src', src)
     },
+
+    async togglePrecisionPark() {
+      await page.getByTestId('opt-precision-park').click()
+    },
+
+    async toggleFluxCapacitor() {
+      await page.getByTestId('opt-flux-capacitor').click()
+    },
+
+    async proceedToCheckout() {
+      await page.getByTestId('checkout-button').click()
+      await expect(page).toHaveURL(/\/order$/)
+    },
   }
 }
