@@ -9,7 +9,7 @@ export type OrderDetails = {
   wheels: string
   customer: { name: string; email: string; document: string; phone: string }
   payment: string
-  totalPrice: number
+  total_price: string
 }
 
 export function createOrderLookupActions(page: Page) {

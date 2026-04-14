@@ -25,7 +25,7 @@ export async function insertOrder(order: OrderDetails) {
     customer_phone: order.customer.phone,
     customer_cpf: order.customer.document,
     payment_method: normalizeValue(order.payment),
-    total_price: order.totalPrice.toString(),
+    total_price: order.total_price,
     status: order.status,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
