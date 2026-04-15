@@ -1,7 +1,22 @@
 import type { Locator } from '@playwright/test'
 import { test, expect } from '../support/fixtures'
+import type { OrderDetails } from '../support/actions/orderLookupActions'
+import { deleteOrdersByCustomerEmail, upsertOrder } from '../support/database/orderRepository'
+
+import testData from '../support/fixtures/orders.json' with { type: 'json' }
 
 const STORE_PAULISTA = 'Velô Paulista - Av. Paulista, 1000'
+
+function splitCustomerName(fullName: string): { name: string; lastname: string } {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return { name: '', lastname: '' }
+  if (parts.length === 1) return { name: parts[0]!, lastname: parts[0]! }
+  return { name: parts[0]!, lastname: parts.slice(1).join(' ') }
+}
+
+function formatPriceBrl(totalPrice: string): string {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(totalPrice))
+}
 
 type CheckoutAlerts = {
   name: Locator
@@ -127,56 +142,42 @@ test.describe('Checkout', () => {
     })
   })
 
-  test.describe('CT05 - Financiamento com score aprovado', () => {
-    test.beforeEach(async ({ page }) => {
-      await page.route('**/functions/v1/credit-analysis', async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ score: 750, status: 'Done' }),
-        })
-      })
-    })
+  test.describe('e2e - Pagamento à vista', () => {
+    test('deve concluir pedido com pagamento à vista sem análise de crédito', async ({ page, app }) => {
+      const order: OrderDetails = testData.aprovado as OrderDetails
+      const expectedTotal = formatPriceBrl(order.total_price)
+      const { name, lastname } = splitCustomerName(order.customer.name)
 
-    test.afterEach(async ({ page }) => {
-      await page.unroute('**/functions/v1/credit-analysis')
-    })
+      const checkoutCustomer = {
+        name,
+        lastname,
+        email: order.customer.email,
+        phone: order.customer.phone,
+        document: order.customer.document.replace(/\D/g, ''),
+      }
 
-    test('deve aprovar pedido com financiamento e score acima de 700', async ({ page, app }) => {
-      const testData = {
-        customer: {
-          name: 'Maria',
-          lastname: 'Santos',
-          email: 'maria.santos.financiamento@example.com',
-          phone: '(11) 98888-7777',
-          document: '52998224725',
-        },
-        store: STORE_PAULISTA,
-        entryValue: 0,
-        expectedInstallment: 'R$ 3.400,00',
-        expectedTotalFinanced: 'R$ 40.800,00',
-        baseVehicleTotal: 'R$ 40.000,00',
-      } as const
+      // Evita acumular um `VLO-*` novo a cada execução: zera pedidos desse e-mail e recria só a massa do JSON.
+      await deleteOrdersByCustomerEmail(order.customer.email)
+      await upsertOrder(order)
 
-      // Arrange
+      // Arrange — página principal
       await page.goto('/')
       await expect(page.getByTestId('landing-page')).toBeVisible()
 
+      // Arrange — configurador (opções padrão)
       await page.getByTestId('cta-button').click()
       await expect(page).toHaveURL(/\/configure/)
-
+      await app.configurator.expectPrice(expectedTotal)
       await app.configurator.finishConfigurator()
+
+      // Arrange — checkout (à vista: total do veículo, sem juros)
       await app.checkout.expectLoaded()
-      await app.checkout.expectSummaryTotal(testData.baseVehicleTotal)
+      await app.checkout.selectPaymentAvista()
+      await app.checkout.expectSummaryTotal(expectedTotal)
 
-      await app.checkout.fillCustomerlData(testData.customer)
-      await app.checkout.selectStore(testData.store)
+      await app.checkout.fillCustomerlData(checkoutCustomer)
+      await app.checkout.selectStore(STORE_PAULISTA)
       await app.checkout.acceptTerms()
-
-      await app.checkout.selectFinancing()
-      await app.checkout.setEntryValue(testData.entryValue)
-      await app.checkout.expectFinancingInstallmentInPaymentCard(testData.expectedInstallment)
-      await app.checkout.expectSummaryTotal(testData.expectedTotalFinanced)
 
       // Act
       await app.checkout.submit()
@@ -184,7 +185,8 @@ test.describe('Checkout', () => {
       // Assert
       await expect(page).toHaveURL(/\/success/)
       await expect(page.getByTestId('success-status')).toHaveText('Pedido Aprovado!')
-      await expect(page.getByText(`(12x de ${testData.expectedInstallment})`)).toBeVisible()
+      await expect(page.getByTestId('order-id')).toBeVisible()
+      await expect(page.getByText(expectedTotal).first()).toBeVisible()
     })
   })
 })

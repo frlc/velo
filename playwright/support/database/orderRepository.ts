@@ -4,18 +4,17 @@ import { OrderDetails } from '../actions/orderLookupActions'
 import crypto from 'crypto'
 
 export function normalizeValue(value: string) {
-  if (!value) return '';
+  if (!value) return ''
 
   return value
-    .normalize('NFD') // separa acentos
-    .replace(/[\u0300-\u036f]/g, '') // remove acentos
-    .replace(/\s+/g, '') // remove espaços
-    .toLowerCase(); // lowercase
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '')
+    .toLowerCase()
 }
 
-export async function insertOrder(order: OrderDetails) {
-
-  const data: OrderTable = {
+function buildOrderRow(order: OrderDetails): OrderTable {
+  return {
     id: crypto.randomUUID(),
     order_number: order.number,
     color: order.color.toLowerCase().replace(' ', '-'),
@@ -31,8 +30,42 @@ export async function insertOrder(order: OrderDetails) {
     updated_at: new Date().toISOString(),
     optionals: [],
   }
-  // If the record exists it might throw a duplicate error, but we manage teardown.
-  await db.insertInto('orders').values(data).execute()
+}
+
+/** Insere um pedido (falha se `order_number` já existir). */
+export async function insertOrder(order: OrderDetails) {
+  await db.insertInto('orders').values(buildOrderRow(order)).execute()
+}
+
+/** Remove todos os pedidos com o e-mail informado (útil antes do E2E de checkout para não acumular `VLO-*` aleatórios). */
+export async function deleteOrdersByCustomerEmail(customerEmail: string) {
+  await db.deleteFrom('orders').where('customer_email', '=', customerEmail).execute()
+}
+
+/**
+ * Insere ou atualiza pelo `order_number` único (ON CONFLICT DO UPDATE).
+ */
+export async function upsertOrder(order: OrderDetails) {
+  const data = buildOrderRow(order)
+  const updateSet = {
+    color: data.color,
+    wheel_type: data.wheel_type,
+    customer_name: data.customer_name,
+    customer_email: data.customer_email,
+    customer_phone: data.customer_phone,
+    customer_cpf: data.customer_cpf,
+    payment_method: data.payment_method,
+    total_price: data.total_price,
+    status: data.status,
+    updated_at: data.updated_at,
+    optionals: data.optionals,
+  }
+
+  await db
+    .insertInto('orders')
+    .values(data)
+    .onConflict((oc) => oc.column('order_number').doUpdateSet(updateSet))
+    .execute()
 }
 
 export async function deleteOrderByNumber(orderNumber: string) {

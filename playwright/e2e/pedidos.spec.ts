@@ -1,7 +1,7 @@
 import { test, expect } from '../support/fixtures'
 import { generateOrderCode } from '../support/helpers'
 import type { OrderDetails } from '../support/actions/orderLookupActions'
-import { insertOrder, deleteOrderByNumber } from '../support/database/orderRepository'
+import { upsertOrder } from '../support/database/orderRepository'
 
 import testData from '../support/fixtures/orders.json' with { type: 'json' }
 
@@ -14,8 +14,7 @@ test.describe('Consulta de Pedido', () => {
   test('deve consultar um pedido aprovado', async ({ app }) => {
     const order: OrderDetails = testData.aprovado as OrderDetails
 
-    await deleteOrderByNumber(order.number)
-    await insertOrder(order)
+    await upsertOrder(order)
 
     await app.orderLookup.searchOrder(order.number)
     await app.orderLookup.validateOrderDetails(order)
@@ -25,8 +24,7 @@ test.describe('Consulta de Pedido', () => {
   test('deve consultar um pedido reprovado', async ({ app }) => {
     const order: OrderDetails = testData.reprovado as OrderDetails
 
-    await deleteOrderByNumber(order.number)
-    await insertOrder(order)
+    await upsertOrder(order)
 
     await app.orderLookup.searchOrder(order.number)
     await app.orderLookup.validateOrderDetails(order)
@@ -36,8 +34,7 @@ test.describe('Consulta de Pedido', () => {
   test('deve consultar um pedido em analise', async ({ app }) => {
     const order: OrderDetails = testData.em_analise as OrderDetails
 
-    await deleteOrderByNumber(order.number)
-    await insertOrder(order)
+    await upsertOrder(order)
 
     await app.orderLookup.searchOrder(order.number)
     await app.orderLookup.validateOrderDetails(order)

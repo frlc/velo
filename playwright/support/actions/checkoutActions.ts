@@ -53,22 +53,10 @@ export function createCheckoutActions(page: Page) {
       await terms.check()
     },
 
-    async selectFinancing() {
-      await page.getByTestId('payment-financiamento').click()
-      await expect(page.getByTestId('input-entry-value')).toBeVisible()
-    },
-
-    async setEntryValue(value: number) {
-      const entryInput = page.getByTestId('input-entry-value')
-      await entryInput.fill(String(value))
-    },
-
-    async expectFinancingInstallmentInPaymentCard(expectedInstallment: string) {
-      await expect(page.getByTestId('payment-financiamento')).toContainText(expectedInstallment)
-    },
-
-    async expectSubmitLoading() {
-      await expect(page.getByRole('button', { name: /Processando/ })).toBeVisible()
+    async selectPaymentAvista() {
+      await page.getByTestId('payment-avista').click()
+      await expect(page.getByTestId('payment-avista')).toBeVisible()
+      await expect(page.getByTestId('input-entry-value')).toHaveCount(0)
     },
 
     async submit() {
