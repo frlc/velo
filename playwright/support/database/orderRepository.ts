@@ -38,3 +38,7 @@ export async function insertOrder(order: OrderDetails) {
 export async function deleteOrderByNumber(orderNumber: string) {
   await db.deleteFrom('orders').where('order_number', '=', orderNumber).execute()
 }
+
+export async function deleteOrderByEmail(customerEmail: string) {
+  await db.deleteFrom('orders').where('customer_email', '=', customerEmail).execute()
+}
