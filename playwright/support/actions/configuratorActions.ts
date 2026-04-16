@@ -8,6 +8,13 @@ export function createConfiguratorActions(page: Page) {
       await page.goto('/configure')
     },
 
+    async startFromHomeAndGoToCheckout(expectedPrice: string) {
+      await page.goto('/')
+      await page.getByRole('link', { name: /Configure Agora/i }).click()
+      await this.expectPrice(expectedPrice)
+      await this.finishConfigurator()
+    },
+
     async selectColor(name: string) {
       await page.getByRole('button', { name }).click()
     },
