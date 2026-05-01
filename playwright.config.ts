@@ -16,12 +16,12 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  
+
   // tempo maximo de execucao de cada teste
   timeout: 60_000,
 
   // tempo maximo de espera para cada expect/assertions: toVisible, toContainText, etc.
-  expect: { 
+  expect: {
     timeout: 5_000,
   },
 
@@ -59,15 +59,15 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
-  /*   {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    }, */
+    /*   {
+        name: 'firefox',
+        use: { ...devices['Desktop Firefox'] },
+      },
+  
+      {
+        name: 'webkit',
+        use: { ...devices['Desktop Safari'] },
+      }, */
 
     /* Test against mobile viewports. */
     // {
@@ -91,9 +91,9 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    command: 'yarn dev',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env.CI,
+  },
 });
