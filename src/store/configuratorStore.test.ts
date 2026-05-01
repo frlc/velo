@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { calculateTotalPrice, calculateInstallment, formatPrice, CarConfiguration } from './configuratorStore';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { calculateTotalPrice, calculateInstallment, formatPrice, CarConfiguration, useConfiguratorStore } from './configuratorStore';
 
 describe('configuratorStore utilities', () => {
   describe('calculateTotalPrice', () => {
@@ -62,6 +62,46 @@ describe('configuratorStore utilities', () => {
       const formatted = formatPrice(40000);
       // Use regex to ignore the type of space (normal or non-breaking) used by different Node versions
       expect(formatted).toMatch(/R\$\s?40\.000,00/);
+    });
+  });
+});
+
+describe('configuratorStore state actions', () => {
+  beforeEach(() => {
+    // Reset state before each test
+    useConfiguratorStore.getState().resetConfiguration();
+  });
+
+  describe('toggleOptional', () => {
+    it('should add an optional if it is not present in the state', () => {
+      const store = useConfiguratorStore.getState();
+      
+      // Initially, optionals should be empty
+      expect(store.configuration.optionals).toEqual([]);
+      
+      // Toggle 'precision-park'
+      store.toggleOptional('precision-park');
+      
+      // Get updated state
+      const updatedStore = useConfiguratorStore.getState();
+      expect(updatedStore.configuration.optionals).toContain('precision-park');
+      expect(updatedStore.configuration.optionals.length).toBe(1);
+    });
+
+    it('should remove an optional if it is already present in the state', () => {
+      const store = useConfiguratorStore.getState();
+      
+      // Add 'flux-capacitor'
+      store.toggleOptional('flux-capacitor');
+      expect(useConfiguratorStore.getState().configuration.optionals).toContain('flux-capacitor');
+      
+      // Toggle 'flux-capacitor' again
+      useConfiguratorStore.getState().toggleOptional('flux-capacitor');
+      
+      // Verify it was removed
+      const updatedStore = useConfiguratorStore.getState();
+      expect(updatedStore.configuration.optionals).not.toContain('flux-capacitor');
+      expect(updatedStore.configuration.optionals.length).toBe(0);
     });
   });
 });

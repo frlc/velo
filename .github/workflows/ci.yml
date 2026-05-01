@@ -36,6 +36,10 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
+      # Executa auditoria de segurança nas dependências
+      - name: Security Audit
+        run: npm audit || true
+
       # Executa os testes unitários com o Vitest
       - name: Run Unit Tests
         run: yarn test

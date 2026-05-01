@@ -27,7 +27,7 @@ function generateOrderNumber(): string {
   return result;
 }
 
-function dbOrderToOrder(dbOrder: DbOrder): Order {
+export function dbOrderToOrder(dbOrder: DbOrder): Order {
   const nameParts = dbOrder.customer_name.split(' ');
   const firstName = nameParts[0] || '';
   const surname = nameParts.slice(1).join(' ') || '';
