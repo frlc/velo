@@ -369,7 +369,7 @@ test.describe('Checkout', () => {
       await app.checkout.submit()
 
       // Assert
-      await app.checkout.expectResult('Pedido Aprovado!')
+      await app.checkout.expectResult('Pedido Aprovado!');
     })
 
   })
