@@ -13,7 +13,9 @@ on:
 env:
   NODE_VERSION: '24'
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-  VERCEL_SCOPE: fernando-cruzs-projects-d9e96edf
+  VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
   unit-tests:
