@@ -75,10 +75,6 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
-      # Executa auditoria de segurança nas dependências
-      - name: Security Audit
-        run: npm audit || true
-
       # Obter configuração do Vercel
       - name: Pull Vercel Config
         run: yarn vercel pull --yes --environment=preview --token=$VERCEL_TOKEN --scope=$VERCEL_SCOPE
@@ -91,7 +87,7 @@ jobs:
       - name: Deploy Preview
         id: deploy
         run: |
-          URL=$(yarn vercel deploy --prebuilt --target=preview --token=$VERCEL_TOKEN --scope=$VERCEL_SCOPE)
+          URL=$(yarn --silent vercel deploy --prebuilt --target=preview --token=$VERCEL_TOKEN --scope=$VERCEL_SCOPE)
           echo "deployment-url=$URL" >> $GITHUB_OUTPUT
 
   e2e-tests:
