@@ -2,7 +2,7 @@
 # através da execução de testes unitários a cada push na branch principal.
 # Estrutura preparada para expansão futura com novos jobs e etapas de validação.
 
-name: Continuous Integration
+name: Continuous Deployment
 
 on:
   workflow_dispatch:  
@@ -131,4 +131,16 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report
-        
+
+  promote-to-production:
+    name: Promote to Production
+    needs: [ e2e-tests ]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Vercel Promote
+        run: |
+         yarn vercel promote ${{ needs.build-and-deploy.outputs.deployment-url }} \
+         --token=${{ env.VERCEL_TOKEN }} /
+         --scope=${{ env.VERCEL_SCOPE }} /
+         --yes
