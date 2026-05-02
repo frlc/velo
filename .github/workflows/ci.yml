@@ -11,6 +11,8 @@ on:
 
 env:
   NODE_VERSION: '24'
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  VERCEL_SCOPE: fernando-cruzs-projects-d9e96edf
 
 jobs:
   unit-tests:
@@ -43,3 +45,39 @@ jobs:
       # Executa os testes unitários com o Vitest
       - name: Run Unit Tests
         run: yarn test
+
+  build-and-deploy:
+    name: Build & Deploy Vercel Preview
+    needs: [ unit-tests ]
+    runs-on: ubuntu-latest
+
+    steps:
+      # Realiza o checkout do repositório para o runner
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      # Configura a versão do Node.js definida na variável global
+      - name: Setup Node
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Habilita o Corepack para gerenciamento nativo do Yarn
+      - name: Enable Corepack
+        run: corepack enable
+
+      # Instala as dependências do projeto respeitando o yarn.lock
+      - name: Install Dependencies
+        run: yarn install
+
+      # Executa auditoria de segurança nas dependências
+      - name: Security Audit
+        run: npm audit || true
+
+      # Build para o Vercel
+      - name: Build Vercel
+        run: yarn vercel build --token=$VERCEL_TOKEN
+
+      # Deploy preview no vercel
+      - name: Deploy Preview
+        run: yarn vercel deploy --prebuilt --target=preview --token=$VERCEL_TOKEN --scope=$VERCEL_SCOPE
