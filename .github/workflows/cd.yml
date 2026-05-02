@@ -140,7 +140,7 @@ jobs:
     steps:
       - name: Vercel Promote
         run: |
-         npx vercel@latest promote ${{ needs.build-and-deploy.outputs.deployment-url }} \
+         npx@latest vercel@latest promote ${{ needs.build-and-deploy.outputs.deployment-url }} \
          --token=${{ env.VERCEL_TOKEN }} /
          --scope=${{ env.VERCEL_SCOPE }} /
          --yes
