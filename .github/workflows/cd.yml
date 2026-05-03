@@ -95,6 +95,9 @@ jobs:
     name: Run E2E Tests
     needs: [ build-and-deploy ]
     runs-on: ubuntu-latest
+    env:
+      # Garantir que o Playwright use só E2E_DATABASE_URL (secret preview), não DATABASE_URL herdado.
+      DATABASE_URL: ''
 
     steps:
       # Realiza o checkout do repositório para o runner
@@ -119,11 +122,12 @@ jobs:
       - name: Install Playwright Browser
         run: npx playwright install --with-deps chromium
 
-      # Execução dos testes E2E
+      # Execução dos testes E2E (Postgres apenas projeto preview — secret SUPABASE_PREVIEW_DATABASE_URL)
       - name: Run E2E Tests
         run: yarn playwright test
         env:
           BASE_URL: ${{ needs.build-and-deploy.outputs.deployment-url }}
+          E2E_DATABASE_URL: ${{ secrets.SUPABASE_PREVIEW_DATABASE_URL }}
 
       # Relátorio de testes Automatizados'
       - name: Upload Playwright Report
