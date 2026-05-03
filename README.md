@@ -77,12 +77,28 @@ No painel do projeto em [Vercel](https://vercel.com) → **Settings → Environm
 |----------|---------|------------|
 | `VITE_SUPABASE_URL` | URL do projeto Supabase de **preview** | URL do projeto Supabase de **produção** |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | chave anon/publishable do preview | chave do projeto de produção |
+| `VITE_SUPABASE_PROJECT_ID` | ref do projeto preview (opcional no front) | ref do projeto de produção |
+
+**Importante:** cada variável precisa ter **valor preenchido** nos ambientes correspondentes (não deixe `VITE_*` apenas criadas ou com string vazia). Se o `vercel pull` trouxer `VITE_SUPABASE_URL=""`, o `vite build` gera bundle sem Supabase e o site pode abrir **em branco**. Depois de corrigir, faça um novo deploy (rode o workflow de CD ou redeploy manual).
 
 O workflow em `.github/workflows/cd.yml` executa `vercel pull` + build com `--environment=preview` no deploy de preview e com `--environment=production` no promote; o bundle do front passa a apontar para o Supabase correspondente.
 
 ### 4. GitHub Actions (E2E no banco de preview)
 
 No repositório GitHub → **Settings → Secrets and variables → Actions**, crie o secret **`SUPABASE_PREVIEW_DATABASE_URL`** com a connection string PostgreSQL (pooler) do projeto Supabase de **preview** apenas. O job `e2e-tests` define `E2E_DATABASE_URL` a partir desse secret para que seeds e limpezas do Playwright não usem produção.
+
+**Opcional — reforço no CI (frontend):** Se as variáveis `VITE_*` no painel da Vercel vierem vazias no `vercel pull`, o workflow pode **sobrescrever** o `.env.production.local` antes do build com secrets do GitHub (apenas quando **URL** e **publishable key** estiverem definidas):
+
+| Secret | Uso |
+|--------|-----|
+| `PREVIEW_VITE_SUPABASE_URL` | URL do projeto Supabase **preview** (job build preview) |
+| `PREVIEW_VITE_SUPABASE_PUBLISHABLE_KEY` | Chave publishable/anônima do preview |
+| `PREVIEW_VITE_SUPABASE_PROJECT_ID` | Opcional (`VITE_SUPABASE_PROJECT_ID`) |
+| `PRODUCTION_VITE_SUPABASE_URL` | URL do Supabase **produção** (job promote) |
+| `PRODUCTION_VITE_SUPABASE_PUBLISHABLE_KEY` | Chave de produção |
+| `PRODUCTION_VITE_SUPABASE_PROJECT_ID` | Opcional |
+
+Com isso, o CI continua alinhado ao Supabase mesmo com placeholders vazios na Vercel; o ideal é ainda assim corrigir os valores no painel da Vercel para ambientes Preview e Production.
 
 ### 5. Deploy (banco + functions)
 
@@ -108,6 +124,8 @@ Pronto! O banco e as functions estarão configurados.
 ## Continuous Deployment
 
 Push na branch `main` dispara o workflow **Continuous Deployment** (`.github/workflows/cd.yml`): testes unitários, build e deploy **preview** na Vercel, testes E2E contra a URL de preview e o banco preview, e em seguida build + deploy de **produção**. O deploy automático pelo Git na `main` está desligado em `vercel.json`; o fluxo passa só pelo Actions.
+
+Depois de ajustar variáveis na Vercel ou secrets `PREVIEW_VITE_*` / `PRODUCTION_VITE_*`, rode o workflow de novo em **Actions** e valide preview e domínio de produção no navegador (aba **Console** para erros de Supabase).
 
 ---
 
