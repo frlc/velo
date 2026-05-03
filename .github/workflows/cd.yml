@@ -81,6 +81,7 @@ jobs:
         run: |
           yarn vercel pull --yes --environment=preview --token=$VERCEL_TOKEN --scope=$VERCEL_SCOPE
           cp .vercel/.env.preview.local .env.production.local
+          cat .env.production.local
 
       # Build para o Vercel
       - name: Build Vercel
@@ -168,6 +169,7 @@ jobs:
         run: |
           yarn vercel pull --yes --environment=production --token=$VERCEL_TOKEN --scope=$VERCEL_SCOPE
           cp .vercel/.env.production.local .env.production.local
+          cat .env.production.local
 
       - name: Build Vercel Production
         run: yarn vercel build --prod --token=$VERCEL_TOKEN
