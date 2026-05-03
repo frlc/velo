@@ -161,9 +161,12 @@ jobs:
       - name: Pull Vercel Config
         run: yarn vercel pull --yes --environment=production --token=$VERCEL_TOKEN --scope=$VERCEL_SCOPE
 
-      - name: Vercel Promote
+      - name: Build Vercel Production
+        run: yarn vercel build --prod --token=$VERCEL_TOKEN
+
+      - name: Deploy Production
         run: |
-          yarn vercel promote ${{ needs.build-and-deploy.outputs.deployment-url }} \
+          yarn vercel deploy --prebuilt --prod \
           --token=${{ env.VERCEL_TOKEN }} \
           --scope=${{ env.VERCEL_SCOPE }} \
           --yes
