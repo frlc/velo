@@ -16,6 +16,7 @@ env:
   VERCEL_SCOPE: fernando-cruzs-projects-d9e96edf
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  TEST_DINO_TOKEN: ${{ secrets.TEST_DINO_TOKEN }}
 
 jobs:
   unit-tests:
@@ -132,6 +133,11 @@ jobs:
           name: playwright-report
           path: playwright-report
 
+      # Publicar Report json do Test Dino
+      - name: Publish TestDino Report
+        if: ${{ !cancelled() }}
+        run: npx tdpw upload ./playwright-report --token=${{ env.TEST_DINO_TOKEN }}
+          
   promote-to-production:
     name: Promote to Production
     needs: [ build-and-deploy, e2e-tests ]
