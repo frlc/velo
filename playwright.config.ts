@@ -12,6 +12,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
+const baseURL = process.env.BASE_URL || 'http://localhost:5173';
+const useLocalWebServer =
+  process.env.PLAYWRIGHT_WEB_SERVER !== '0' &&
+  (baseURL.includes('127.0.0.1') || baseURL.includes('localhost'));
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -42,7 +47,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
-    baseURL: process.env.BASE_URL || 'http://localhost:5173',
+    baseURL,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on',
@@ -93,10 +98,14 @@ export default defineConfig({
     // },
   ],
 
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'yarn dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-  },
+  /* Sobe o Vite só quando os testes rodam contra localhost (CI com BASE_URL na Vercel não precisa). */
+  ...(useLocalWebServer
+    ? {
+        webServer: {
+          command: 'yarn dev',
+          url: 'http://localhost:5173',
+          reuseExistingServer: !process.env.CI,
+        },
+      }
+    : {}),
 });

@@ -76,9 +76,24 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
-      # Obter configuração do Vercel
+      # Obter configuração do Vercel (env fica em .vercel/; o Vite no `vite build` lê .env*. na raiz).
+      # Secrets opcionais PREVIEW_VITE_* sobrescrevem VITE_* após o pull (evita bundle com VITE vazio).
       - name: Pull Vercel Config
-        run: yarn vercel pull --yes --environment=preview --token=$VERCEL_TOKEN --scope=$VERCEL_SCOPE
+        env:
+          OV_URL: ${{ secrets.PREVIEW_VITE_SUPABASE_URL }}
+          OV_KEY: ${{ secrets.PREVIEW_VITE_SUPABASE_PUBLISHABLE_KEY }}
+          OV_PROJECT_ID: ${{ secrets.PREVIEW_VITE_SUPABASE_PROJECT_ID }}
+        run: |
+          yarn vercel pull --yes --environment=preview --token=$VERCEL_TOKEN --scope=$VERCEL_SCOPE
+          cp .vercel/.env.preview.local .env.production.local
+          if [ -n "$OV_URL" ] && [ -n "$OV_KEY" ]; then
+            grep -vE '^VITE_SUPABASE_(URL|PUBLISHABLE_KEY|PROJECT_ID)=' .env.production.local > .env.production.local.tmp && mv .env.production.local.tmp .env.production.local
+            printf 'VITE_SUPABASE_URL=%s\n' "$OV_URL" >> .env.production.local
+            printf 'VITE_SUPABASE_PUBLISHABLE_KEY=%s\n' "$OV_KEY" >> .env.production.local
+            if [ -n "$OV_PROJECT_ID" ]; then
+              printf 'VITE_SUPABASE_PROJECT_ID=%s\n' "$OV_PROJECT_ID" >> .env.production.local
+            fi
+          fi
 
       # Build para o Vercel
       - name: Build Vercel
@@ -95,6 +110,9 @@ jobs:
     name: Run E2E Tests
     needs: [ build-and-deploy ]
     runs-on: ubuntu-latest
+    env:
+      # Garantir que o Playwright use só E2E_DATABASE_URL (secret preview), não DATABASE_URL herdado.
+      DATABASE_URL: ''
 
     steps:
       # Realiza o checkout do repositório para o runner
@@ -119,11 +137,12 @@ jobs:
       - name: Install Playwright Browser
         run: npx playwright install --with-deps chromium
 
-      # Execução dos testes E2E
+      # Execução dos testes E2E (Postgres apenas projeto preview — secret SUPABASE_PREVIEW_DATABASE_URL)
       - name: Run E2E Tests
         run: yarn playwright test
         env:
           BASE_URL: ${{ needs.build-and-deploy.outputs.deployment-url }}
+          E2E_DATABASE_URL: ${{ secrets.SUPABASE_PREVIEW_DATABASE_URL }}
 
       # Relátorio de testes Automatizados'
       - name: Upload Playwright Report
@@ -159,11 +178,28 @@ jobs:
         run: yarn install
 
       - name: Pull Vercel Config
-        run: yarn vercel pull --yes --environment=production --token=$VERCEL_TOKEN --scope=$VERCEL_SCOPE
-
-      - name: Vercel Promote
+        env:
+          OV_URL: ${{ secrets.PRODUCTION_VITE_SUPABASE_URL }}
+          OV_KEY: ${{ secrets.PRODUCTION_VITE_SUPABASE_PUBLISHABLE_KEY }}
+          OV_PROJECT_ID: ${{ secrets.PRODUCTION_VITE_SUPABASE_PROJECT_ID }}
         run: |
-          yarn vercel promote ${{ needs.build-and-deploy.outputs.deployment-url }} \
+          yarn vercel pull --yes --environment=production --token=$VERCEL_TOKEN --scope=$VERCEL_SCOPE
+          cp .vercel/.env.production.local .env.production.local
+          if [ -n "$OV_URL" ] && [ -n "$OV_KEY" ]; then
+            grep -vE '^VITE_SUPABASE_(URL|PUBLISHABLE_KEY|PROJECT_ID)=' .env.production.local > .env.production.local.tmp && mv .env.production.local.tmp .env.production.local
+            printf 'VITE_SUPABASE_URL=%s\n' "$OV_URL" >> .env.production.local
+            printf 'VITE_SUPABASE_PUBLISHABLE_KEY=%s\n' "$OV_KEY" >> .env.production.local
+            if [ -n "$OV_PROJECT_ID" ]; then
+              printf 'VITE_SUPABASE_PROJECT_ID=%s\n' "$OV_PROJECT_ID" >> .env.production.local
+            fi
+          fi
+
+      - name: Build Vercel Production
+        run: yarn vercel build --prod --token=$VERCEL_TOKEN
+
+      - name: Deploy Production
+        run: |
+          yarn vercel deploy --prebuilt --prod \
           --token=${{ env.VERCEL_TOKEN }} \
           --scope=${{ env.VERCEL_SCOPE }} \
           --yes
